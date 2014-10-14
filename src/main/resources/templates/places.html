@@ -1,0 +1,29 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title> Bootiful Places </title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<H1> Places
+</H1>
+
+<div th:each="p : ${places}">
+
+    <div>
+        <b th:text="${p.id}">ID</b> -
+        <span th:text="${p.name}"> Name</span>
+        <span style="font-size: smaller">
+            <span th:text="${p.city}"> City</span>,
+                <span th:text="${p.state}"> state</span>,
+            <span th:text="${p.country}"> country</span>
+            -
+            <span th:text="${p.zip}"> zip</span>
+        </span>
+    </div>
+</div>
+
+</body>
+</html>
