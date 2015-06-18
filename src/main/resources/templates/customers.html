@@ -1,0 +1,24 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title> Bootiful Reservations </title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<H1> Customers n things
+</H1>
+
+
+<div th:each="r : ${customers}">
+
+    <div>
+        <b th:text="${r.id}">ID</b> -
+        <span th:text="${r.surname}">Name</span>
+
+    </div>
+</div>
+
+</body>
+</html>
