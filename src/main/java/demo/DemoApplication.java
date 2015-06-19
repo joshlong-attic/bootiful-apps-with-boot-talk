@@ -8,6 +8,7 @@ import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
+
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.ExportMetricWriter;
+import org.springframework.boot.actuate.metrics.Metric;
 import org.springframework.boot.actuate.metrics.jmx.JmxMetricWriter;
+import org.springframework.boot.actuate.metrics.writer.Delta;
 import org.springframework.boot.actuate.metrics.writer.MetricWriter;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.CacheManager;
@@ -41,6 +44,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+
 import java.util.*;
 
 @SpringBootApplication
@@ -148,20 +152,23 @@ public class DemoApplication {
     @Configuration
     public static class ApplicationConfiguration {
 
-        @Bean
-        CommandLineRunner run(CustomerRepository repository) {
-            return args
-                    -> Arrays.asList("George,Peter,Henri,Sami,Joonas,Petter".split(","))
-                    .forEach(x -> repository.save(new Customer(x)));
-        }
+      @Bean
+      CommandLineRunner run(CustomerRepository repository) {
+        return args -> Arrays.stream("George,Peter,Henri,Sami,Joonas,Petter".split(",")).forEach(
+            x -> repository.save(new Customer(x)));
+      }
 
-        // this could be statsd, opentsdb, jmx, redis
-        @Bean
-        @ExportMetricWriter
-        MetricWriter jmx(
-                @Qualifier("mbeanExporter") MBeanExporter exporter) {
-            return new JmxMetricWriter(exporter);
+   // this could be statsd, opentsdb, jmx, redis
+      @Bean
+      @ExportMetricWriter
+      MetricWriter jmx(@Qualifier("mbeanExporter") Optional<MBeanExporter> exporter) {
+        
+        if (exporter.isPresent()) {
+          return new JmxMetricWriter(exporter.get());
         }
+        
+        return new NoOpMetricWriter();
+      }
     }
 
 
@@ -171,4 +178,19 @@ public class DemoApplication {
 }
 
 interface CustomerRepository extends JpaRepository<Customer, Long> {
+}
+
+class NoOpMetricWriter implements MetricWriter {
+	
+	@Override
+	public void set(Metric<?> value) {
+	}
+
+	@Override
+	public void reset(String metricName) {
+	}
+
+	@Override
+	public void increment(Delta<?> delta) {
+	}
 }
